@@ -4,7 +4,8 @@ from google.adk.agents import Agent, ParallelAgent, SequentialAgent, LlmAgent
 from google.adk.tools import agent_tool, AgentTool
 from google.adk.tools import google_search
 from .generaltools.generaltools import get_current_date
-from .lsegtools.tickhistory import getVWAP, getMarketPsycSentiment, getCompanyDetails, getSignificantEvents
+from .lsegtools.tickhistory import getVWAP, getMarketPsycSentiment, getCompanyDetails, getSignificantEvents, getESGEnvIndicator, getESGGovIndicator, getESGSocIndicator
+from .generaltools.finhubtools import symbol_lookup
 from .config import config
 import google.auth
 
@@ -42,6 +43,23 @@ symbol_to_ric_agent = LlmAgent(
         "if the the company is BT then the RIC is BT.L"
     ),
     tools=[google_search],
+)
+
+companynews_agent = LlmAgent(
+    name="companynews_agent",
+    # model="gemini-2.5-flash",
+    model=config.gemini_model,
+    description=(
+        "Agent to get the company info for a list of company RICs"
+    ),
+    instruction=(
+        "You are an investemnt helper agent that gets the company news for a company or set of companies."
+        "Make sure the news is for the time period requested by the user"
+        "Only look for verified news and not roumers"
+        "use news from reputable sites and providers"
+    ),
+    tools=[google_search],
+    output_key="companynews_result"
 )
 
 companyinfo_agent = LlmAgent(
@@ -122,6 +140,75 @@ significantevent_agent = LlmAgent(
     output_key="significantevent_result"
 )
 
+esgenvindicator_agent = LlmAgent(
+    name="esgenvindicator_agent",
+    # model="gemini-2.5-flash",
+    model=config.gemini_model,
+    description=(
+        "Agent to get the ESG Environmental Indicators for a list of stock RICs"
+    ),
+    instruction=(
+        "You are an investemnt helper agent that gets the ESG Environmental Indicators for a stock or stocks via the RIC code."
+        "Use the symbol_to_ric_agent tool to first get the ric code and use it as input to the getESGEnvIndicator tool"
+        "You can sent multiple RICs to the getESGEnvIndicator tool as well"
+        "Return the details of ESG Environmental Indicator in the repsonse and an analysis of the results"
+        "getESGEnvIndicator tool requires the fyscal year (as a interger) as input."
+        "Do not generate code, just analyse the data directly"
+        "ignore any time duration from the pompt when doing this analysis, just use the current fiscal year based on the users input and get_current_date"
+        "If you are unsure about the year, use 2025"
+        "Make sure your run the getESGGovIndicator tool with the year 2025 regard if you are unable to do anything"
+        "Regardless of the request duration use the current year 2025 and call the tool: getESGGovIndicator"
+    ),
+    tools=[AgentTool(agent=symbol_to_ric_agent), get_current_date, getESGEnvIndicator],
+    output_key="esgenvindicator_result"
+)
+
+esggovindicator_agent = LlmAgent(
+    name="esggovindicator_agent",
+    # model="gemini-2.5-flash",
+    model=config.gemini_model,
+    description=(
+        "Agent to get the ESG Gov Indicators for a list of stock RICs"
+    ),
+    instruction=(
+        "You are an investemnt helper agent that gets the ESG Gov Indicators for a stock or stocks via the RIC code."
+        "Use the symbol_to_ric_agent tool to first get the ric code and use it as input to the getESGGovIndicator tool"
+        "You can sent multiple RICs to the getESGGovIndicator tool as well"
+        "Return the details of ESG Gov Indicator in the repsonse and an analysis of the results"
+        "getESGGovIndicator tool requires the fyscal year (as a interger) as input. "
+        "Do not generate code, just analyse the data directly"
+        "ignore any time duration from the pompt when doing this analysis, just use the current fiscal year based on the users input and get_current_date"
+        "If you are unsure about the year, use 2025"
+        "Make sure your run the getESGGovIndicator tool with the current year if you are unable to do anything"
+        "Regardless of the request duration use the current year 2025 and call the tool: getESGGovIndicator"
+    ),
+    tools=[AgentTool(agent=symbol_to_ric_agent), get_current_date, getESGGovIndicator],
+    output_key="esggovindicator_result"
+)
+
+esgsocindicator_agent = LlmAgent(
+    name="esgsocindicator_agent",
+    # model="gemini-2.5-flash",
+    model=config.gemini_model,
+    description=(
+        "Agent to get the ESG Soc Indicators for a list of stock RICs"
+    ),
+    instruction=(
+        "You are an investemnt helper agent that gets the ESG Soc Indicators for a stock or stocks via the RIC code."
+        "Use the symbol_to_ric_agent tool to first get the ric code and use it as input to the getESGSocIndicator tool"
+        "You can sent multiple RICs to the getESGSocIndicator tool as well"
+        "Return the details of ESG Soc Indicator in the repsonse and an analysis of the results"
+        "getESGSocIndicator tool requires the fyscal year (as a interger) as input. "
+        "Do not generate code, just analyse the data directly"
+        "ignore any time duration from the pompt when doing this analysis, just use the current fiscal year based on the users input date and get_current_date"
+        "If you are unsure about the year, use 2025"
+        "Make sure your run the getESGGovIndicator tool with the current year if you are unable to do anything"
+        "Regardless of the request duration use the current year 2025 and call the tool: getESGGovIndicator"
+    ),
+    tools=[AgentTool(agent=symbol_to_ric_agent), get_current_date, getESGSocIndicator],
+    output_key="esgsocindicator_result"
+)
+
 data_retrieval_agent = ParallelAgent(
     name="data_retrieval_agent",
     # model="gemini-2.5-flash",
@@ -137,7 +224,7 @@ data_retrieval_agent = ParallelAgent(
     #     "Use the financials_reported_agent to get financials reported"
     #     "Use the sec_filings_agent to get sec filings"
     # ),
-    sub_agents=[companyinfo_agent, vwap_agent, marketpsycsentiment_agent, significantevent_agent]
+    sub_agents=[companyinfo_agent, vwap_agent, marketpsycsentiment_agent, significantevent_agent, esgenvindicator_agent, esggovindicator_agent, esgsocindicator_agent, companynews_agent]
 )
 
 
@@ -157,12 +244,16 @@ report_creation_agent = LlmAgent(
             {vwap_result}
             {marketpsycsentiment_result}
             {significantevent_result}
+            {esgenvindicator_result}
+            {esggovindicator_result}
+            {esgsocindicator_result}
+            {companynews_result}
 
-    In the analysis correlate the VAWP Result {vwap_result} with the news data {marketpsycsentiment_result} and explain how the news impacts the vwap
-    Also include details from {significantevent_result} in the correlations as well.
-
+    In the analysis always add a section at the end to correlate the VAWP Result {vwap_result} with the news data {marketpsycsentiment_result} and explain how the news impacts the vwap
+    Also include details from {significantevent_result}, {esgenvindicator_result}, {esgsocindicator_result}, {companynews_result},and {esggovindicator_result} in the correlations as well.
+    Make sure the entire report output is professionally formated in markdown. 
         **Comprehensive Report:** Your report should be comprehensive, detailes
-        Start with a seciton detailing the company info as stated in {companyinfo_result}. Format it nicely
+        Start with a seciton detailing the company info as stated in {companyinfo_result}. Format it nicely as a table with all the detail and some infrered metrics.
 
 
                         **4. Data Handling and Error Management:**
@@ -252,10 +343,12 @@ root_agent = LlmAgent(
                         "report_creation_agent should be called right at the end of the analysis to create the final report."
                         Always call report_creation_agent at the end of the analysis.
 
+                        Make sure you get convert the company name to RIC using the symbol_to_ric_agent. Do this first always.
+
                         """
 
     ),
-    tools=[get_current_date, AgentTool(agent=symbol_to_ric_agent)],
+    tools=[get_current_date],
     # sub_agents=[symbol_lookup_agent, data_retrieval_agent, report_creation_agent]
     sub_agents=[sequential_agent]
 )

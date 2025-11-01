@@ -65,7 +65,8 @@ def getMarketPsycSentiment(rics: list, start_date: str, end_date: str) -> dict:
         avg(b.stress) stress, avg(b.optimism) optimism, avg(b.joy) joy, avg(b.fear) fear, avg(b.surprise) surprise, 
         avg(b.trust) trust, avg(b.violence) violence, avg(b.volatility) volatility, avg(b.gloom) gloom, avg(b.buzz) buzz, 
         avg(b.conflict) conflict, avg(b.cybercrime) cybercrime,
-        avg(b.emotionvsfact) emotionvsfact, avg(b.innovation) innovation, avg(b.labordispute) labordispute, avg(b.longshort) longshort, avg(b.longshortforecast) longshortforecast, avg(b.lovehate) lovehate, avg(b.marketrisk) marketrisk, avg(b.mergers) mergers FROM `genaillentsearch.LSEGQA202510.company_info_mpicmpinfo` a
+        avg(b.emotionvsfact) emotionvsfact, avg(b.innovation) innovation, avg(b.labordispute) labordispute, avg(b.longshort) longshort, avg(b.longshortforecast) longshortforecast, avg(b.lovehate) lovehate, avg(b.marketrisk) marketrisk, avg(b.mergers) mergers 
+        FROM `genaillentsearch.LSEGQA202510.company_info_mpicmpinfo` a
         inner join `genaillentsearch.LSEGQA202510.company_emotion_MPICmpEmeaData` b
         on a.orgpermid = b.orgpermid
         inner join `genaillentsearch.LSEGQA202510.MPICode` c
@@ -141,7 +142,103 @@ def getSignificantEvents(rics: list, start_date: str, end_date: str) -> dict:
     pd = rows.to_dataframe()
     return {
         "status": "success",
-        "function": "getCompanyDetails",
+        "function": "getSignificantEvents",
+        "report": (
+            pd.to_json()
+        ),
+    }
+
+def getESGEnvIndicator(rics: list, fyscal_year: int) -> dict:
+    """Uses LSEG QA ESG data to get Env Indicators data for  RIC codes
+
+    Args:
+        rics (list): The stock RIC of the companies whoes significant events are being retreived.
+        fyscal_year (int): The fiscal year (just the year as an integer) for which to retreive the ESG env indicator.
+    Returns:
+        dict: status and result or error msg.
+    """
+    placeholders = ', '.join(map(str, rics))
+    query = ("""### Obtain Company Details for RICs
+        select a.ric, b.*, c.* from `genaillentsearch.LSEGQA202510.company_info_mpicmpinfo` a
+        inner join `genaillentsearch.LSEGQA202510.ESG2EnvIndicator` b
+        on a.orgpermid = b.orgpermid
+        inner join `genaillentsearch.LSEGQA202510.ESG2Item` c
+        on b.item = c.item
+        where ric in ('{0}')
+        and fy={1}
+        """).format(placeholders, fyscal_year)
+    
+    client = bigquery.Client(project=PROJECT_ID)
+    query_job = client.query(query)
+    rows = query_job.result()
+    pd = rows.to_dataframe()
+    return {
+        "status": "success",
+        "function": "getESGEnvIndicator",
+        "report": (
+            pd.to_json()
+        ),
+    }
+
+def getESGGovIndicator(rics: list, fyscal_year: int) -> dict:
+    """Uses LSEG QA ESG data to get Gov Indicators data for  RIC codes
+
+    Args:
+        rics (list): The stock RIC of the companies whoes significant events are being retreived.
+        fyscal_year (int): The fiscal year (just the year as an integer) for which to retreive the ESG Gov indicator.
+    Returns:
+        dict: status and result or error msg.
+    """
+    placeholders = ', '.join(map(str, rics))
+    query = ("""### Obtain Company Details for RICs
+        select a.ric, b.*, c.* from `genaillentsearch.LSEGQA202510.company_info_mpicmpinfo` a
+        inner join `genaillentsearch.LSEGQA202510.ESG2GovIndicator` b
+        on a.orgpermid = b.orgpermid
+        inner join `genaillentsearch.LSEGQA202510.ESG2Item` c
+        on b.item = c.item
+        where ric in ('{0}')
+        and fy={1}
+        """).format(placeholders, fyscal_year)
+    
+    client = bigquery.Client(project=PROJECT_ID)
+    query_job = client.query(query)
+    rows = query_job.result()
+    pd = rows.to_dataframe()
+    return {
+        "status": "success",
+        "function": "getESGGovIndicator",
+        "report": (
+            pd.to_json()
+        ),
+    }
+
+def getESGSocIndicator(rics: list, fyscal_year: int) -> dict:
+    """Uses LSEG QA ESG data to get Soc Indicators data for  RIC codes
+
+    Args:
+        rics (list): The stock RIC of the companies whoes significant events are being retreived.
+        fyscal_year (int): The fiscal year (just the year as an integer) for which to retreive the ESG Soc indicator.
+    Returns:
+        dict: status and result or error msg.
+    """
+    placeholders = ', '.join(map(str, rics))
+    query = ("""### Obtain Company Details for RICs
+        select a.ric, b.*, c.* from `genaillentsearch.LSEGQA202510.company_info_mpicmpinfo` a
+        inner join `genaillentsearch.LSEGQA202510.ESG2SocIndicator` b
+        on a.orgpermid = b.orgpermid
+        inner join `genaillentsearch.LSEGQA202510.ESG2Item` c
+        on b.item = c.item
+        where ric in ('{0}')
+        and fy={1}
+        """).format(placeholders, fyscal_year)
+    
+    client = bigquery.Client(project=PROJECT_ID)
+    query_job = client.query(query)
+    rows = query_job.result()
+    pd = rows.to_dataframe()
+    return {
+        "status": "success",
+        "function": "getESGSocIndicator",
         "report": (
             pd.to_json()
         ),
