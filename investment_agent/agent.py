@@ -72,7 +72,7 @@ companyinfo_agent = LlmAgent(
     instruction=(
         "You are an investemnt helper agent that gets the company info for a stock or stocks via the RIC code."
         "Use the symbol_to_ric_agent tool to first get the ric code and use it as input to the getCompanyDetails tool"
-        "You can sent multiple RICs to the getCompanyDetails tool as well"
+        "You can send multiple RICs to the getCompanyDetails tool as well"
         "Return the company info with a formatted table in the repsonse that can be used in a report"
         "ignore any time duration when doing this analysis"
         "do not prompt the user, just return the company info in the repsonse"
