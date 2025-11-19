@@ -4,15 +4,15 @@ TARGET_URL="https://discoveryengine.googleapis.com/v1alpha/projects/genaillentse
 
 JSON_DATA=$(cat <<EOF
 {
-    "displayName": "MarketMind LSEG QA Agent",
-    "description": "Allows analysis of financial markets using LSEG Tick History and QA",
+    "displayName": "MarketMind LSEG QA Agent Gemini 3",
+    "description": "Allows analysis of financial markets using LSEG Tick History and QA using Gemini 3",
     "adk_agent_definition": 
     {
         "tool_settings": {
             "tool_description": "Various Market analysis tools including lseg tick history and QA "
         },
         "provisioned_reasoning_engine": {
-            "reasoning_engine":"projects/884152252139/locations/us-central1/reasoningEngines/8819046426949451776"
+            "reasoning_engine":"projects/884152252139/locations/us-central1/reasoningEngines/8422729659740848128"
         }
     }
 }

@@ -9,10 +9,29 @@ from .generaltools.finhubtools import symbol_lookup
 from .config import config
 import google.auth
 
+from google import genai
+
+from .helpercode import get_project_id
+
+import vertexai
+
+import os
+
 from google.adk.tools.bigquery import BigQueryCredentialsConfig
 from google.adk.tools.bigquery import BigQueryToolset
 from google.adk.tools.bigquery.config import BigQueryToolConfig
 from google.adk.tools.bigquery.config import WriteMode
+from google.adk.models import google_llm
+
+os.environ['GOOGLE_CLOUD_LOCATION'] ="global"
+
+api_client = genai.Client(
+    vertexai=True,
+    project=get_project_id(),
+    location="global"
+)
+model = google_llm.Gemini(model=config.gemini_model)
+model.api_client= api_client 
 
 # Define a tool configuration to block any write operations
 tool_config = BigQueryToolConfig(write_mode=WriteMode.BLOCKED)
@@ -32,7 +51,8 @@ bigquery_toolset = BigQueryToolset(
 symbol_to_ric_agent = LlmAgent(
     name="symbol_to_ric_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to convert Company to RIC"
     ),
@@ -48,7 +68,8 @@ symbol_to_ric_agent = LlmAgent(
 companynews_agent = LlmAgent(
     name="companynews_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to get the company info for a list of company RICs"
     ),
@@ -65,7 +86,8 @@ companynews_agent = LlmAgent(
 companyinfo_agent = LlmAgent(
     name="companyinfo_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to get the company info for a list of company RICs"
     ),
@@ -85,7 +107,8 @@ companyinfo_agent = LlmAgent(
 vwap_agent = LlmAgent(
     name="vwap_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to get the VWAP for a list of stock RICs"
     ),
@@ -102,7 +125,8 @@ vwap_agent = LlmAgent(
 marketpsycsentiment_agent = LlmAgent(
     name="marketpsycsentiment_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to get the market sentiment for a list of stock RICs"
     ),
@@ -126,7 +150,8 @@ marketpsycsentiment_agent = LlmAgent(
 significantevent_agent = LlmAgent(
     name="significantevent_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to get the significant events for a list of stock RICs"
     ),
@@ -143,7 +168,8 @@ significantevent_agent = LlmAgent(
 esgenvindicator_agent = LlmAgent(
     name="esgenvindicator_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to get the ESG Environmental Indicators for a list of stock RICs"
     ),
@@ -166,7 +192,8 @@ esgenvindicator_agent = LlmAgent(
 esggovindicator_agent = LlmAgent(
     name="esggovindicator_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to get the ESG Gov Indicators for a list of stock RICs"
     ),
@@ -189,7 +216,8 @@ esggovindicator_agent = LlmAgent(
 esgsocindicator_agent = LlmAgent(
     name="esgsocindicator_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "Agent to get the ESG Soc Indicators for a list of stock RICs"
     ),
@@ -231,7 +259,8 @@ data_retrieval_agent = ParallelAgent(
 report_creation_agent = LlmAgent(
     name="report_creation_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "You are an agent helping an investment analyst create a report on an asset or stock"
     ),
@@ -279,7 +308,8 @@ sequential_agent = SequentialAgent(
 root_agent = LlmAgent(
     name="investment_agent",
     # model="gemini-2.5-flash",
-    model=config.gemini_model,
+    # model=config.gemini_model,
+    model= model,
     description=(
         "You are an agent helping an investment analyst at an asset manager"
     ),
