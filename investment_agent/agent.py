@@ -25,6 +25,8 @@ from google.adk.models import google_llm
 
 os.environ['GOOGLE_CLOUD_LOCATION'] ="global"
 
+from google import genai
+
 api_client = genai.Client(
     vertexai=True,
     project=get_project_id(),
@@ -63,7 +65,7 @@ symbol_to_ric_agent = LlmAgent(
         "if the the company is BT then the RIC is BT.L"
     ),
     tools=[google_search],
-)
+)   
 
 companynews_agent = LlmAgent(
     name="companynews_agent",
