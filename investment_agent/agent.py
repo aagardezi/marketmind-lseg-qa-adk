@@ -52,8 +52,6 @@ bigquery_toolset = BigQueryToolset(
 
 symbol_to_ric_agent = LlmAgent(
     name="symbol_to_ric_agent",
-    # model="gemini-2.5-flash",
-    # model=config.gemini_model,
     model= model,
     description=(
         "Agent to convert Company to RIC"
