@@ -12,7 +12,7 @@ The MarketMind agent is built on a hierarchical and parallel agent architecture,
 
 ### Agent/Sub-agent Design
 
-The core of the system is a `root_agent` that orchestrates the entire workflow. The architecture is as follows:
+The core of the system is a `root_agent` (named `investment_agent` in the code) that orchestrates the entire workflow. The architecture is as follows:
 
 1.  **`root_agent`**: The main entry point that receives the user's query. It uses a `sequential_agent` to manage the analysis process.
 
@@ -41,13 +41,9 @@ The MarketMind agent utilizes a variety of tools to perform its functions:
 *   **LSEG Tick History**: Queries LSEG's tick history data stored in Google BigQuery to calculate VWAP and retrieve other market data.
 *   **LSEG QA MarketPsyc**: Uses LSEG's MarketPsyc data in BigQuery to get market sentiment scores.
 *   **LSEG QA ESG**: Retrieves ESG indicators from LSEG's ESG data in BigQuery.
-*   **Finnhub API**: The `finhubtools` provide access to the Finnhub API for a wide range of financial data, including:
-    *   Company News
-    *   Company Profile
-    *   Basic Financials
-    *   Insider Sentiment
 *   **Google Search**: Used by the `symbol_to_ric_agent` and `companynews_agent` to find RICs and news articles.
 *   **BigQuery**: The `lsegtools` use the BigQuery API to query the LSEG datasets.
+*   **Finnhub API (Available)**: The project includes `finhubtools` (`investment_agent/generaltools/finhubtools.py`) that provide access to the Finnhub API for a wide range of financial data (Company News, Profile, Financials, etc.). However, the default agent configuration in `investment_agent/agent.py` primarily relies on LSEG tools and Google Search. The Finnhub tools are available for use but are not fully integrated into the main workflow.
 
 ### Data Sources
 
@@ -97,6 +93,7 @@ To set up and run the MarketMind agent, you will need to:
     *   Make sure you have a Google Cloud project with the BigQuery API enabled.
     *   You will need to have access to the LSEG datasets in BigQuery.
     *   Set up authentication by running `gcloud auth application-default login`.
+    *   (Optional) Create a `.env` file in the root directory (or `investment_agent` directory) to specify environment variables like `GOOGLE_CLOUD_PROJECT`.
 3.  **Set up your Finnhub API key**:
     *   Get a free API key from [https://finnhub.io/](https://finnhub.io/).
     *   Store the API key in Google Secret Manager with the name `FinHubAccessKey`.
@@ -108,3 +105,12 @@ To set up and run the MarketMind agent, you will need to:
     > analyze Vodafone
     ```
     This command will trigger the agent to perform a full analysis of Vodafone, resulting in a detailed report.
+
+## Deployment
+
+The project includes scripts to help you deploy the agent to Google Cloud (Agent Engine).
+
+*   `agentenginedeploy.sh`: Deploys the MarketMind agent using a default configuration.
+*   `agentenginedeploygemini3.sh`: Deploys the agent using the Gemini 3 model configuration.
+
+These scripts use `curl` to interact with the Discovery Engine API. You may need to customize them with your specific project and location details before running.
