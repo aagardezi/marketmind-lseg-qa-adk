@@ -106,6 +106,39 @@ To set up and run the MarketMind agent, you will need to:
     ```
     This command will trigger the agent to perform a full analysis of Vodafone, resulting in a detailed report.
 
+## Evaluations
+
+The project includes a comprehensive evaluation suite using the Google Agent Development Kit (ADK) `adk eval` framework to test the investment analyst agent's performance.
+
+### How Evaluations are Created
+
+Evaluations are designed using the V2 ADK evaluation format. They consist of:
+1.  **Test Cases (`investment_agent/investment_agent.test.json`)**: Contains defining inputs (e.g., prompt to analyze Vodafone and BT) and the expected outputs. Crucially, this file includes a recorded "gold standard" agent trace, specifying the exact sequence of sub-agent tool calls (`expected_tool_use`) that the `root_agent` should make to successfully retrieve the required data.
+2.  **Configuration (`investment_agent/test_config.json`)**: Defines the evaluation strictness.
+    -   `tool_trajectory_avg_score`: Set to `ANY_ORDER` with a threshold of `1.0`. This ensures that the agent makes all the necessary API calls/tool usages to gather complete data, but allows the LLM some non-deterministic flexibility in the *order* those parallel requests are dispatched.
+    -   `response_match_score`: Configured with a floating threshold (e.g., `0.30`) to accommodate the natural variance in how an LLM synthesizes and phrases long financial reports while still ensuring the core facts are present.
+
+### How to Enhance Evaluations
+
+To build upon the testing framework:
+*   **Add New Test Cases:** Capture the full execution trace of the agent handling a new edge case or a different sector analysis using the ADK logging format. Insert this new input/output mapping into the `investment_agent.test.json` array.
+*   **Extend Tool Checks:** As new tools (like Finnhub endpoints) are integrated into the main workflow, their expected invocations should be added to the `expected_tool_use` array within new or existing eval cases.
+
+### Value of the Evaluation Suite
+
+*   **Regression Testing:** Ensures that modifying the agent's prompts, adding new sub-agents, or switching underlying LLM models (e.g., migrating from Gemini 2.5 flash to Gemini 3.1 Pro) does not break existing data retrieval trajectories.
+*   **Reliability:** By enforcing that all required tools (VWAP, ESG, Sentiment, etc.) are actually called during analysis, we guarantee the final report is grounded in complete data rather than LLM hallucinations.
+*   **Performance Tuning:** The `response_match_score` provides a benchmark to iterate on system prompts to yield better, more consistent report formatting.
+
+### How to Run
+
+You can execute the evaluation suite locally using the ADK CLI. Ensure you are in the root of the project directory.
+
+```bash
+adk eval investment_agent investment_agent/investment_agent.test.json --config_file_path investment_agent/test_config.json --print_detailed_results
+```
+The output will display the `tool_trajectory_avg_score` and `response_match_score` for all test cases, indicating whether the agent's logic remains intact.
+
 ## Deployment
 
 The project includes scripts to help you deploy the agent to Google Cloud (Agent Engine).
