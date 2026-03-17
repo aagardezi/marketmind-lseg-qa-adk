@@ -113,8 +113,8 @@ The project includes a comprehensive evaluation suite using the Google Agent Dev
 ### How Evaluations are Created
 
 Evaluations are designed using the V2 ADK evaluation format. They consist of:
-1.  **Test Cases (`investment_agent/investment_agent.test.json`)**: Contains defining inputs (e.g., prompt to analyze Vodafone and BT) and the expected outputs. Crucially, this file includes a recorded "gold standard" agent trace, specifying the exact sequence of sub-agent tool calls (`expected_tool_use`) that the `root_agent` should make to successfully retrieve the required data.
-2.  **Configuration (`investment_agent/test_config.json`)**: Defines the evaluation strictness.
+1.  **Test Cases (`investment_agent/eval/investment_agent.test.json`)**: Contains defining inputs (e.g., prompt to analyze Vodafone and BT) and the expected outputs. Crucially, this file includes a recorded "gold standard" agent trace, specifying the exact sequence of sub-agent tool calls (`expected_tool_use`) that the `root_agent` should make to successfully retrieve the required data.
+2.  **Configuration (`investment_agent/eval/test_config.json`)**: Defines the evaluation strictness.
     -   `tool_trajectory_avg_score`: Set to `ANY_ORDER` with a threshold of `1.0`. This ensures that the agent makes all the necessary API calls/tool usages to gather complete data, but allows the LLM some non-deterministic flexibility in the *order* those parallel requests are dispatched.
     -   `response_match_score`: Configured with a floating threshold (e.g., `0.30`) to accommodate the natural variance in how an LLM synthesizes and phrases long financial reports while still ensuring the core facts are present.
 
@@ -135,7 +135,7 @@ To build upon the testing framework:
 You can execute the evaluation suite locally using the ADK CLI. Ensure you are in the root of the project directory.
 
 ```bash
-adk eval investment_agent investment_agent/investment_agent.test.json --config_file_path investment_agent/test_config.json --print_detailed_results
+adk eval investment_agent investment_agent/eval/investment_agent.test.json --config_file_path investment_agent/eval/test_config.json --print_detailed_results
 ```
 The output will display the `tool_trajectory_avg_score` and `response_match_score` for all test cases, indicating whether the agent's logic remains intact.
 
