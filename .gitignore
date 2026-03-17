@@ -206,5 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-
-.adk
+# ADK
+.adk/
+!.adk/eval_history/
